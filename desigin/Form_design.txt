@@ -1,0 +1,17 @@
+
+
+ 目标：自动生成form
+
+ 步骤：
+
+    1. 分析form结构
+        @PACKAGE_NAME@ 通过 classFormFullName获得
+        @IMPORT_TYPE@ 通过ordinaryPropertyMap获得，如果有多对一的话，那么要拼private Long @classname@Id;
+        @CLASS_NAME@ 通过CLASS_NAME获得
+        @PROPERTY@ 通过ordinaryPropertyMap获得
+        @DEFAULT_CONSTRUCTOR@ 通过getDefaultConstructor获得
+        @GETTER_AND_SETTER@ getGetterAndSetter方法需要改造下
+    2. 分析参数
+        2.1 hbm文件名
+    3. 编写build.xml
+    4. 编写java类

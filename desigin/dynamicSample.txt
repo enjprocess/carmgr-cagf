@@ -1,0 +1,63 @@
+
+serviceImpl part：
+
+    /****************************************************/
+    /*ServiceImpl 根据多对一生成的动态方法模板          */
+    /****************************************************/
+    @Override
+    public List<@CLASS_NAME@Data> find@CLASS_NAME@ListBy@MANY_TO_ONE_TYPE@Id(long @MANY_TO_ONE_PROPERTY@) {
+        List<@CLASS_NAME@> @classname@List = @classname@Repository.findAll((r, q, cb) -> {
+            Predicate p = cb.and(cb.equal(r.get("@MANY_TO_ONE_TYPE@").get("id"), @MANY_TO_ONE_PROPERTY@), cb.equal(r.get("deleted"),false));
+            q.where(p);
+            q.orderBy(cb.desc(r.get("id")));
+            return q.getRestriction();
+        });
+
+        if (@classname@List == null) {
+            throw new CodeDefinedException(ExceptionCode.EX_NOT_FOUND_ERROR);
+        }
+
+
+        return @classname@List.stream().map(p -> new @CLASS_NAME@Data(p)).collect(Collectors.toList());
+    }
+    
+    
+    /****************************************************/
+    /*ServiceImpl 根据多对一生成的动态方法模板 带分页   */
+    /****************************************************/
+    @Override
+    public PageData<@CLASS_NAME@Data> find@CLASS_NAME@PageBy@MANY_TO_ONE_TYPE@Id(long @MANY_TO_ONE_PROPERTY@, Pageable pageable) {
+        Page<@CLASS_NAME@> @classname@Page = @classname@Repository.findAll((r, q, cb) -> {
+            Predicate p = cb.and(cb.equal(r.get("@MANY_TO_ONE_TYPE@").get("id"), @MANY_TO_ONE_PROPERTY@), cb.equal(r.get("deleted"),false));
+            q.where(p);
+            q.orderBy(cb.desc(r.get("id")));
+            return q.getRestriction();
+        }, pageable);
+
+
+        if (@classname@Page == null) {
+            throw new CodeDefinedException(ExceptionCode.EX_NOT_FOUND_ERROR);
+        }
+
+        return new PageData(@classname@Page.map(p -> new @CLASS_NAME@Data(p)));
+    }
+    
+Controller part :
+
+    /****************************************************/
+    /*Controller 根据多对一生成的动态方法模板           */
+    /****************************************************/
+    @RequestMapping(value = "/queryList/{@many_to_one_property@}", method = RequestMethod.GET)
+    public Result find@CLASSNAME@ListBy@MANY_TO_ONE_PROPERTY@(@PathVariable  long @many_to_one_property@) {
+        List<@CLASSNAME@Data> ret = @classname@Service.find@CLASSNAME@ListBy@MANY_TO_ONE_PROPERTY@(@many_to_one_property@);
+        return Result.success(ret);
+    }
+
+    /****************************************************/
+    /*Controller 根据多对一生成的动态方法模板  带分页   */
+    /****************************************************/
+    @RequestMapping(value = "/queryPage/{@many_to_one_property@}", method = RequestMethod.GET)
+    public Result find@CLASSNAME@PageBy@MANY_TO_ONE_PROPERTY@(@PathVariable long @many_to_one_property@, QueryParam queryParam) {
+        PageData<@CLASSNAME@Data> ret = @classname@Service.find@CLASSNAME@PageBy@MANY_TO_ONE_PROPERTY@(@many_to_one_property@, queryParam.getPageable());
+        return Result.success(ret);
+    }

@@ -1,0 +1,19 @@
+
+
+    hbm解析：
+        
+        one to many:
+            <set name="users">
+                <key column="groupId"></key>			
+                <one-to-many class="User" />
+            </set>
+            解析为：private Set<User> users; 
+            貌似有两种方式：一种是@OneToMany @JoinColumn 还有一种是@OneToMany(mappedBy=)
+        many to one: 
+            sample： <many-to-one name="department" column="depart_id" class="com.xxx.xxx.Department" />  
+            使用jdom解析到many_to_one的话，那么类型是Department 属性是 departmet 注解是@joinColumn(name = "depart_id") @ManyToOne
+        one to one:
+        many to many:
+    
+    
+        备忘：因为对Hibernate关联还不熟悉，所以暂时只对@ManyToOne进行处理，

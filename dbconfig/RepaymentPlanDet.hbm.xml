@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+	<class name="cn.com.workapp.carmgr.domain.model.handovercar.RepaymentPlanDet" table="rental_repayment_plan_det">
+
+		<id name="id" column="id" type="long">
+			<generator class="native"></generator>
+		</id>
+
+		<property name="receiptTime" column="receipt_time" type="date"></property>
+		<many-to-one name="repaymentPlan" column="repayment_plan_id" class="cn.com.workapp.carmgr.domain.model.handovercar.RepaymentPlan" />
+		<property name="receiptAmount" column="receipt_amount" type="big_decimal"></property>
+	
+	</class>
+
+</hibernate-mapping>

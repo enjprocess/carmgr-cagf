@@ -1,0 +1,24 @@
+
+
+
+ 模板使用登记：
+ 
+    当前类所属包名                                 @PACKAGE_NAME@                    
+    ORM类所需要的Form实体                          @CLASS_FORM_FULL_NAME@
+    ORM类所需要的Data实体                          @CLASS_DATA_FULL_NAME@
+    使用字段所产生的类型                           @IMPORT_TYPE@
+    实体对应的表名                                 @TABLE_NAME@
+    实体名字                                       @CLASS_NAME@
+    实体全限定名                                   @CLASS_FULL_NAME@
+    私有属性                                       @PROPERTY@
+    默认构造器                                     @DEFAULT_CONSTRUCTOR@
+    拥有Form属性构造器                             @HAVE_FORM_ARGS_CONSTRUCTOR@
+    拥有CLASS参数的构造器                          @HAVE_CLASS_ARG_CONSTRUCTOR@
+    getter和setter方法                             @GETTER_AND_SETTER@
+    更新方法                                       @UPDATE_METHOD@
+    ManyToOne所产生service接口查询方法             @MANY_TO_ONE_SERVICE_METHOD@
+    ManyToOne所产生serviceImpl查询方法             @MANY_TO_ONE_SERVICE_IMPL_METHOD@
+    Repository类全限定名                           @REPOSITORY_CLASS_FULL_NAME@
+    ManyToOne所产生的Dao查询                       @MANY_TO_ONE_REPOSITORY_QUERY@
+    Repository保存操作                             @REPOSITORY_SAVE_OPERATOR@
+    ORM更新操作                                    @ORM_UPDATE_OPERATOR@

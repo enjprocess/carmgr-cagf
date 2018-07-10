@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="carmgr-cagf" basedir="." default="init">
+
+    <property file="build.properties" />
+
+    <!-- 设置ant运行环境 -->
+    <target name="ant.run.environment.set">
+        <path id="ant.run.classpath">
+            <pathelement path="${classes}" />
+            <fileset  dir="${dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+        </path>
+    </target>
+
+    <!-- 获取hbm文件集 -->
+    <target name="hibernate.mappings.set">
+        <fileset id="hibernate.mappings" dir="${hbmDir}">
+            <include name="**/*.hbm.xml" />
+        </fileset>
+        <pathconvert property="hibernate.mappings.string" refid="hibernate.mappings" pathsep=" " />
+    </target>
+
+    <!-- 自动生成carmgr code -->
+    <target name="init" depends="ant.run.environment.set, hibernate.mappings.set">
+
+        <!-- 生成ORM -->
+        <java classname="com.cagf.tool.hbm2orm.GenerateOrmCode" >
+            <classpath refid="ant.run.classpath" />
+            <arg line="--outputDir=${outputDir}" />
+            <arg line="--templateFile=${templateDir}/${ormTemplateFile}" />
+            <arg line="${hibernate.mappings.string}" />
+        </java>
+
+        <!-- 生成Form -->
+        <java classname="com.cagf.tool.hbm2form.GenerateFormCode" >
+            <classpath refid="ant.run.classpath" />
+            <arg line="--outputDir=${outputDir}" />
+            <arg line="--templateFile=${templateDir}/${formTempalteFile}" />
+            <arg line="${hibernate.mappings.string}" />
+        </java>
+
+        <!-- 生成Data-->
+<!--
+        <java classname="com.cagf.tool.hbm2data.GenerateDataCode" >
+            <classpath refid="ant.run.classpath" />
+            <arg line="&#45;&#45;outputDir=${outputDir}" />
+            <arg line="&#45;&#45;templateFile=${templateDir}/${dataTemplateFile}" />
+            <arg line="${hibernate.mappings.string}" />
+        </java>
+-->
+
+
+    </target>
+
+</project>

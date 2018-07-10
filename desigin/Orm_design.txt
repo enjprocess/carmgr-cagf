@@ -1,0 +1,31 @@
+
+
+ 目标：自动生成orm
+
+ 步骤：
+
+    1. 分析orm结构
+        @PACKAGE_NAME@ 通过 hbm.name获得
+        @CLASS_FORM_FULL_NAME@; 通过hbm.name获得
+        @CLASS_NAME@ 通过hbm.name获得
+        @IMPORT_TYPE@ 通过 hbm type获得
+
+        @PROPERTY@ 通过hbm.property获得
+        @DEFAULT_CONSTRUCTOR@ 通过hbm.name获得
+        @HAVE_FORM_ARGS_CONSTRUCTOR@ 通过hbm.name 和 <many-to-one>获得
+        @GETTER_AND_SETTER@ 通过hbm.property获得
+        @UPDATE_METHOD@ 通过hbm.name和<many-to-one>获得
+
+        1.1 @PROPERTY@ 获取步骤 :
+            1.1.1 首先准备一个hibernate与java类型映射的静态hibernateJavaMap [hibernate的类型为key，Java类型为value
+            1.1.2 准备一个map<String,map<String,String>来存储'属性名'、'字段名'、'类型',之后替换掉@PROPERTY@，
+                  遇到<many-to-one>的时候不读取type属性，而是读取class属性，该步骤顺带将类型写入到一个typeList中，
+                  之后用来替换掉@IMPORT_TYPE@，类型是通过hibernateJavaMap来取得
+        1.2 @IMPORT_TYPE@ 获取步骤：
+            通过1.1 获取到了@IMPORT_TYPE@，不过需要过滤下，排除掉java.util以及java.lang包
+
+
+    2. 分析参数
+        2.1 hbm文件名
+    3. 编写build.xml
+    4. 编写java类
