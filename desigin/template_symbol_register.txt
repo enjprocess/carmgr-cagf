@@ -22,3 +22,5 @@
     ManyToOne所产生的Dao查询                       @MANY_TO_ONE_REPOSITORY_QUERY@
     Repository保存操作                             @REPOSITORY_SAVE_OPERATOR@
     ORM更新操作                                    @ORM_UPDATE_OPERATOR@
+    构造器中属性赋值                                 @PROPERTY_ASSIGN@
+    ORM类全限定名                                    @ORM_CLASS_NAME@

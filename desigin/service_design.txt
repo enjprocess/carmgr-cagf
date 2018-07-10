@@ -1,0 +1,44 @@
+package @PACKAGE_NAME@;
+
+import cn.com.workapp.carmgr.application.data.PageData;
+
+import @CLASS_DATA_FULL_NAME@;
+import @CLASS_FORM_FULL_NAME@;
+
+import org.springframework.data.domain.Pageable;
+
+
+import java.util.*;
+
+public interface @CLASS_NAME@Service {
+
+    long add@CLASS_NAME@(@CLASS_NAME@Form form);
+
+    void del@CLASS_NAME@(long id);
+
+    void update@CLASS_NAME@(long id, @CLASS_NAME@Form form);
+
+    @CLASS_NAME@Data findOne@CLASS_NAME@ById(long id);
+
+@MANY_TO_ONE_SERVICE_METHOD@
+}
+
+    目标：automatic generate service
+
+    implement targs step:
+        1. 分析service结构
+            1.1 @PACKAGE_NAME@ = getBasicPackageName + ".application"
+            1.2 @CLASS_DATA_FULL_NAME@ = getBasicPackageName + ".application.data." + moduleName + className+ "Data"
+            1.3 @CLASS_FORM_FULL_NAME@ = getBasicPackageName + ".application.query." + moduleName + className+ "Form"
+            1.4 @CLASS_NAME@ 通过 getShortType(classFullName)获得
+
+            1.5 @MANY_TO_ONE_SERVICE_METHOD@
+                根据manyMap来决定这一组方法的数量
+                List<@CLASS_NAME@Data> find@CLASS_NAME@ListBy@MANY_TYPE@Id(long @MANY_TYPE@Id);
+                PageData<@CLASS_NAME@Data> find@CLASS_NAME@PageBy@MANY_TYPE@Id(long @MANY_TYPE@Id, Pageable pageable);
+        2. 分析传入参数
+            2.1 outputdir
+            2.2 templateFilePath
+            2.3 hbm文件
+        3. 编写build.xml
+        4. 编写java类

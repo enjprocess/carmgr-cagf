@@ -1,10 +1,12 @@
 package @PACKAGE_NAME@;
 
-
+import @REPOSITORY_CLASS_NAME@;
+import @SERVICE_FULL_NAME@;
 import @CLASS_DATA_FULL_NAME@;
 import @CLASS_FORM_FULL_NAME@;
 import @CLASS_FULL_NAME@;
-import @REPOSITORY_CLASS_FULL_NAME@
+
+
 
 @IMPORT_TYPE@
 
@@ -36,7 +38,6 @@ public class @CLASS_NAME@ServiceImpl implements @CLASS_NAME@Service {
 
     @Override
     public long add@CLASS_NAME@(@CLASS_NAME@Form form) {
-        //先要查一下
 @MANY_TO_ONE_REPOSITORY_QUERY@
 @REPOSITORY_SAVE_OPERATOR@
     }
@@ -46,15 +47,15 @@ public class @CLASS_NAME@ServiceImpl implements @CLASS_NAME@Service {
         List<@CLASS_NAME@> @classname@List = checkData(id, @classname@Repository);
 
         @CLASS_NAME@ @classname@ = @classname@List.get(0);
-        @classname@.delete();//假删除
+        @classname@.delete();
     }
 
     @SuppressWarnings("unchecked")
     private <T> List<T> checkData(long id, BaseRepository br) {
 
-        List<T> @classname@List = null;
+        List<T> list = null;
         try {
-            @classname@List = br.findAll((r, q, cb) -> {
+            list = br.findAll((r, q, cb) -> {
                 Predicate p = cb.equal(r.get("id"), id);
                 q.where(p);
                 return q.getRestriction();
@@ -64,10 +65,10 @@ public class @CLASS_NAME@ServiceImpl implements @CLASS_NAME@Service {
             throw new CodeDefinedException(ExceptionCode.EX_NOT_FOUND_ERROR);
         }
 
-        if (@classname@List.size() > 1) {
+        if (list.size() > 1) {
             throw new CodeDefinedException(ExceptionCode.EX_REPEAT_ERROR);
         }
-        return @classname@List;
+        return list;
     }
 
     @Override

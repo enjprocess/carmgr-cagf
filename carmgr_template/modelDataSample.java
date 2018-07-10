@@ -1,6 +1,7 @@
 package @PACKAGE_NAME@;
 
-import @CLASS_FULL_NAME@;
+import @ORM_CLASS_NAME@;
+
 @IMPORT_TYPE@
 
 import java.util.*;
@@ -15,7 +16,12 @@ public class @CLASS_NAME@Data {
     public @CLASS_NAME@Data() {
     }
 
-@HAVE_CLASS_ARG_CONSTRUCTOR@
+    public @CLASS_NAME@Data(@CLASS_NAME@ @classname@) {
+        this.id = @classname@.id();
+@PROPERTY_ASSIGN@
+
+    }
+
 
     public Long getId() {
         return id;

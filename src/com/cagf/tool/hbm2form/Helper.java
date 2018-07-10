@@ -49,7 +49,6 @@ public class Helper {
             String templateFileContent = FileUtils.getFileData(templateFile);
             //创造出orm对象
             String newOrm = doReplace(templateFileContent);
-            System.out.println(newOrm);
 
             //写到磁盘
             javaFileDiskPath = outputDir + "/" + classPackagePath + "/" + className + FORM + ".java";

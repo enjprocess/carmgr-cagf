@@ -39,8 +39,13 @@ public class Constant {
     public static final String UPDATE_METHOD = "@UPDATE_METHOD@";                                           //更新方法
     public static final String MANY_TO_ONE_SERVICE_METHOD = "@MANY_TO_ONE_SERVICE_METHOD@";                 //ManyToOne所产生service接口查询方法
     public static final String MANY_TO_ONE_SERVICE_IMPL_METHOD = "@MANY_TO_ONE_SERVICE_IMPL_METHOD@";       //ManyToOne所产生serviceImpl查询方法
-    public static final String REPOSITORY_CLASS_FULL_NAME = "@REPOSITORY_CLASS_FULL_NAME@";                 //Repository类全限定名
+    public static final String REPOSITORY_CLASS_NAME = "@REPOSITORY_CLASS_NAME@";                 //Repository类全限定名
     public static final String MANY_TO_ONE_REPOSITORY_QUERY = "@MANY_TO_ONE_REPOSITORY_QUERY@";             //ManyToOne所产生的Dao查询
     public static final String REPOSITORY_SAVE_OPERATOR = "@REPOSITORY_SAVE_OPERATOR@";                     //Repository保存操作
     public static final String ORM_UPDATE_OPERATOR = "@ORM_UPDATE_OPERATOR@";                               //ORM更新操作
+    
+    public static final String PROPERTY_ASSIGN = "@PROPERTY_ASSIGN@";                                       //构造器中属性赋值
+    public static final String CLASS_LOWER_NAME = "@classname@";                                           //类名首字母小写
+    public static final String ORM_CLASS_NAME = "@ORM_CLASS_NAME@";                                         //ORM类全限定名
+    public static final String SERVICE_FULL_NAME = "@SERVICE_FULL_NAME@";                                   //service全限定名
 }

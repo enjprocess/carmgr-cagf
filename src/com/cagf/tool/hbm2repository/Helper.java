@@ -1,4 +1,4 @@
-package com.cagf.tool.hbm2data;
+package com.cagf.tool.hbm2repository;
 
 import com.cagf.tool.util.FileUtils;
 import org.jdom.JDOMException;
@@ -31,7 +31,7 @@ public class Helper {
     private String fileParentDir;
     private String tableName;
     private String basicPackageName;
-    private String propertyAssign;
+    private String classRepositoryPackageName;
 
     private  Helper() {
     }
@@ -41,23 +41,23 @@ public class Helper {
     }
 
     //根据hbm生成ORM
-    public void generateData(String outputDir, List<String> hbmList, String templateFile) throws IOException, JDOMException {
-        int i = 0;
-        for (; i < hbmList.size(); i++) {
+    public void generateRepository(String outputDir, List<String> hbmList, String templateFile) throws IOException, JDOMException {
+        int count = 0;
+        for (int i = 0; i < hbmList.size(); i++,count++) {
             //设置基本数据
             setBasicData(hbmList, i);
             //读取模板文件内容
             String templateFileContent = FileUtils.getFileData(templateFile);
             //创造出orm对象
             String newOrm = doReplace(templateFileContent);
-
             //写到磁盘
-            javaFileDiskPath = outputDir + "/" + classPackagePath + "/" + className + "Data" + ".java";
+            javaFileDiskPath = outputDir + "/" + classPackagePath + "/" + className + "Repository" + ".java";
             fileParentDir = outputDir + "/" + classPackagePath;
             writeToDisk(fileParentDir, javaFileDiskPath, newOrm);
 
         }
-        System.out.println("generate " + i + " Data files");
+
+        System.out.println("generate " + count+ " repository files");
     }
 
     private void writeToDisk(String fileParentDir, String javaFileDiskPath, String ormContent) throws IOException {
@@ -69,25 +69,29 @@ public class Helper {
         out.close();
     }
 
-/*
 
-        @IMPORT_TYPE@ 通过ordinaryPropertyMap获得，如果有多对一的话，那么要拼private Long @classname@Id;
-        @CLASS_NAME@ 通过CLASS_NAME获得
-        @PROPERTY@ 通过ordinaryPropertyMap获得
-        @DEFAULT_CONSTRUCTOR@ 通过getDefaultConstructor获得
-        @GETTER_AND_SETTER@ getGetterAndSetter方法需要改造下
-*
-*
-* */
+    /*
+    *
+        @IMPORT_TYPE@ 通过 hbm type获得
+
+        OVER @PROPERTY@ 通过hbm.property获得
+
+        @DEFAULT_CONSTRUCTOR@ 通过hbm.name获得
+
+        @HAVE_FORM_ARGS_CONSTRUCTOR@ 通过hbm.name 和 <many-to-one>获得
+
+        @GETTER_AND_SETTER@ 通过hbm.property获得
+
+        @UPDATE_METHOD@ 通过hbm.name和<many-to-one>获得
+    *
+    *
+    *
+    *
+    * */
     private String doReplace(String templateContent) {
-        return templateContent.replace(PACKAGE_NAME, classPackageName)
-                .replace(CLASS_NAME, className)
-                .replace(PROPERTY, property)
-                .replace(IMPORT_TYPE, importType)
-                .replace(CLASS_LOWER_NAME, lowerClassName)
-                .replace(PROPERTY_ASSIGN, propertyAssign)
-                .replace(ORM_CLASS_NAME,classFullName)
-                .replace(GETTER_AND_SETTER, getterAndSetter).trim();
+        return templateContent.replace(PACKAGE_NAME, classRepositoryPackageName)
+                .replace(ORM_CLASS_NAME, classFullName)
+                .replace(CLASS_NAME, className).trim();
 
     }
 
@@ -97,30 +101,33 @@ public class Helper {
         hbmContent = FileUtils.getFileData(hbmList.get(i));
         //得到ORM类的全限定名
         classFullName = FileUtils.getClassFullName(hbmContent);
-
-        //得到模块名字
-        moduleName = FileUtils.getModuleName(classFullName);
-
-        //classFullName用Data替换掉
-        //cn.com.workapp.carmgr.application.data.handovercar;
-        String classDataFullName = FileUtils.getBasicPackageName(classFullName) + DOT + APPLICATION + DOT + DATA + DOT + moduleName
-                + DOT + FileUtils.getShortType(classFullName) + "Data";
-
+        classPackageName = FileUtils.getClassPackageName(classFullName);
         //得到Orm简名
         className = FileUtils.getClassName(classFullName);
         //得到首字母小写的Orm简名
         lowerClassName = FileUtils.getLowerClassName(className);
+        //得到模块名字
+        moduleName = FileUtils.getModuleName(classFullName);
 
-        //得到DATA类的包名
-        classPackageName = FileUtils.getClassPackageName(classDataFullName);
+        //得到基础包名
+        this.basicPackageName = FileUtils.getBasicPackageName(classFullName);
 
-        //得到DATA类的包名的物理路径
-        classPackagePath = FileUtils.getClassPackagePath(classPackageName);
+        //得到ORM form名字
+        classFormFullName = this.basicPackageName + DOT + APPLICATION + DOT + QUERY + DOT + moduleName + DOT
+                + className + FORM;
 
-        property = FileUtils.getPropertyOfData(hbmList.get(i));
+        classRepositoryPackageName = basicPackageName + "." + "persistence" + "." + "jpa" + "." + moduleName;
+        classPackagePath = FileUtils.getClassPackagePath(classRepositoryPackageName);
+
+        //得到table_name
+        tableName = FileUtils.getTableName(hbmContent);
+
+        property = FileUtils.getProperty(hbmList.get(i));
         importType = FileUtils.getImportType();
+        defaultConstructor = FileUtils.getDefaultConstructor(className);
 
-        propertyAssign = FileUtils.getPropertyAssign(className);
+        haveFormArgsConstructor = FileUtils.getHaveFormArgsConstructor(className,FileUtils.getShortType(classFormFullName));
         getterAndSetter = FileUtils.getGetterAndSetter();
+        updateMethod = FileUtils.getUpdateMethod(FileUtils.getShortType(classFormFullName));
     }
 }

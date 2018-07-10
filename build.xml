@@ -41,14 +41,36 @@
         </java>
 
         <!-- 生成Data-->
-<!--
         <java classname="com.cagf.tool.hbm2data.GenerateDataCode" >
             <classpath refid="ant.run.classpath" />
-            <arg line="&#45;&#45;outputDir=${outputDir}" />
-            <arg line="&#45;&#45;templateFile=${templateDir}/${dataTemplateFile}" />
+            <arg line="--outputDir=${outputDir}" />
+            <arg line="--templateFile=${templateDir}/${dataTemplateFile}" />
             <arg line="${hibernate.mappings.string}" />
         </java>
--->
+
+        <!-- 生成Repository-->
+        <java classname="com.cagf.tool.hbm2repository.GenerateRepositoryCode" >
+            <classpath refid="ant.run.classpath" />
+            <arg line="--outputDir=${outputDir}" />
+            <arg line="--templateFile=${templateDir}/${repositoryTemplateFile}" />
+            <arg line="${hibernate.mappings.string}" />
+        </java>
+
+        <!-- 生成Service-->
+        <java classname="com.cagf.tool.hbm2service.GenerateServiceCode" >
+            <classpath refid="ant.run.classpath" />
+            <arg line="--outputDir=${outputDir}" />
+            <arg line="--templateFile=${templateDir}/${serviceTemplateFile}" />
+            <arg line="${hibernate.mappings.string}" />
+        </java>
+
+        <!-- 生成ServiceImpl-->
+        <java classname="com.cagf.tool.hbm2serviceimpl.GenerateServiceImplCode" >
+            <classpath refid="ant.run.classpath" />
+            <arg line="--outputDir=${outputDir}" />
+            <arg line="--templateFile=${templateDir}/${serviceImplTemplateFile}" />
+            <arg line="${hibernate.mappings.string}" />
+        </java>
 
 
     </target>

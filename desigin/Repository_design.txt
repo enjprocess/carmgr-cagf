@@ -1,0 +1,19 @@
+package @PACKAGE_NAME@;
+
+import @ORM_CLASS_NAME@;
+import cn.com.workapp.carmgr.persistence.jpa.BaseRepository;
+import java.util.*;
+
+public interface @CLASS_NAME@Repository extends BaseRepository<@CLASS_NAME@> {
+}
+
+    目标：自动生成repository
+
+    目标实施步骤：
+        1. 分析Repository结构
+            1.1 @PACKAGE_NAME@; 通过getBasicPackageName + "." + persistence + "." + "jpa" + "." + modulename 而成
+            1.2 @ORM_CLASS_NAME@ 通过hbm.name获得
+            1.3 @CLASS_NAME@ 通过 hbm.name获得
+        2. 分析build传入参数
+        3. 编写build.xml
+        4. 编写java类

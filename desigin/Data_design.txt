@@ -6,7 +6,7 @@
 
     1. 分析form结构
         @PACKAGE_NAME@ 通过 classFormFullName获得
-        @IMPORT_TYPE@ 通过ordinaryPropertyMap获得，如果有多对一的话，那么要拼private Long @classname@Id;
+        @IMPORT_TYPE@ 类似于ORM
         @CLASS_NAME@ 通过CLASS_NAME获得
         @PROPERTY@ 通过ordinaryPropertyMap获得
         @DEFAULT_CONSTRUCTOR@ 通过getDefaultConstructor获得

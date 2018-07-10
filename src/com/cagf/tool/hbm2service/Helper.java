@@ -1,4 +1,4 @@
-package com.cagf.tool.hbm2data;
+package com.cagf.tool.hbm2service;
 
 import com.cagf.tool.util.FileUtils;
 import org.jdom.JDOMException;
@@ -32,6 +32,9 @@ public class Helper {
     private String tableName;
     private String basicPackageName;
     private String propertyAssign;
+    private String classDataFullName;
+    private String classFormFullName1;
+    private String manyToOneServiceMethod;
 
     private  Helper() {
     }
@@ -41,7 +44,7 @@ public class Helper {
     }
 
     //根据hbm生成ORM
-    public void generateData(String outputDir, List<String> hbmList, String templateFile) throws IOException, JDOMException {
+    public void generateService(String outputDir, List<String> hbmList, String templateFile) throws IOException, JDOMException {
         int i = 0;
         for (; i < hbmList.size(); i++) {
             //设置基本数据
@@ -52,12 +55,12 @@ public class Helper {
             String newOrm = doReplace(templateFileContent);
 
             //写到磁盘
-            javaFileDiskPath = outputDir + "/" + classPackagePath + "/" + className + "Data" + ".java";
+            javaFileDiskPath = outputDir + "/" + classPackagePath + "/" + className + "Service" + ".java";
             fileParentDir = outputDir + "/" + classPackagePath;
             writeToDisk(fileParentDir, javaFileDiskPath, newOrm);
 
         }
-        System.out.println("generate " + i + " Data files");
+        System.out.println("generate " + i + " service files");
     }
 
     private void writeToDisk(String fileParentDir, String javaFileDiskPath, String ormContent) throws IOException {
@@ -81,14 +84,10 @@ public class Helper {
 * */
     private String doReplace(String templateContent) {
         return templateContent.replace(PACKAGE_NAME, classPackageName)
+                .replace(CLASS_DATA_FULL_NAME, classDataFullName)
+                .replace(CLASS_FORM_FULL_NAME, classFormFullName)
                 .replace(CLASS_NAME, className)
-                .replace(PROPERTY, property)
-                .replace(IMPORT_TYPE, importType)
-                .replace(CLASS_LOWER_NAME, lowerClassName)
-                .replace(PROPERTY_ASSIGN, propertyAssign)
-                .replace(ORM_CLASS_NAME,classFullName)
-                .replace(GETTER_AND_SETTER, getterAndSetter).trim();
-
+                .replace(MANY_TO_ONE_SERVICE_METHOD, manyToOneServiceMethod).trim();
     }
 
     //设置基本数据，为之后处理做准备
@@ -103,7 +102,7 @@ public class Helper {
 
         //classFullName用Data替换掉
         //cn.com.workapp.carmgr.application.data.handovercar;
-        String classDataFullName = FileUtils.getBasicPackageName(classFullName) + DOT + APPLICATION + DOT + DATA + DOT + moduleName
+        classDataFullName = FileUtils.getBasicPackageName(classFullName) + DOT + APPLICATION + DOT + DATA + DOT + moduleName
                 + DOT + FileUtils.getShortType(classFullName) + "Data";
 
         //得到Orm简名
@@ -112,15 +111,21 @@ public class Helper {
         lowerClassName = FileUtils.getLowerClassName(className);
 
         //得到DATA类的包名
-        classPackageName = FileUtils.getClassPackageName(classDataFullName);
+        classPackageName = FileUtils.getBasicPackageName(classFullName) + ".application";
 
         //得到DATA类的包名的物理路径
         classPackagePath = FileUtils.getClassPackagePath(classPackageName);
+
+
+        classFormFullName = FileUtils.getBasicPackageName(classFullName) + ".application.query." + moduleName + "." + className + "Form";
 
         property = FileUtils.getPropertyOfData(hbmList.get(i));
         importType = FileUtils.getImportType();
 
         propertyAssign = FileUtils.getPropertyAssign(className);
         getterAndSetter = FileUtils.getGetterAndSetter();
+
+        manyToOneServiceMethod = FileUtils.getManyToOneServiceMethod(className);
+
     }
 }

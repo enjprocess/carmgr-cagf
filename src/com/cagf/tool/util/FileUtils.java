@@ -5,6 +5,7 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
+import javax.persistence.Id;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -150,11 +151,7 @@ public class FileUtils {
             //获得简写类型
             type = getShortType(type);
             //貌似不需要存储
-
-
             ordinaryPropertyMap.put(type, name);
-            propertyPart.append("\t@Column(name = \"").append(column).append("\")\n")
-                    .append("\t").append("private ").append(type).append(" ").append(name).append(";\n\n");
         }
 
         for (Element child : manyToOne) {
@@ -164,7 +161,8 @@ public class FileUtils {
 
             //如果与当前类是同包下可以省略import,这里就不处理
             importPart.append("import ").append(type).append(";\n");
-
+            String repository = getRepositoryByORM(type);
+            importPart.append("import ").append(repository).append(";\n");
 
             //获得简写类型
             type = getShortType(type);
@@ -172,14 +170,17 @@ public class FileUtils {
             //保存many-to-one的Type与name，后续会用到
             manyToOnePropertyMap.put(type, name);
 
-            propertyPart.append("\t@JoinColumn(name = \"").append(column).append("\")\n")
-                    .append("\t").append("@ManyToOne").append("\n")
-                    .append("\t").append("private ").append(type).append(" ").append(name).append(";\n\n");
-
+            propertyPart
+                    .append("\t").append("@Autowired").append("\n")
+                    .append("\t").append("private ").append(type).append("Repository").append(" ").append(getLowerClassName(type)).append("Repository").append(";\n\n");
 
         }
 
         return propertyPart.toString();
+    }
+
+    private static String getRepositoryByORM(String type) {
+        return getBasicPackageName(type) + ".persistence.jpa." + getModuleName(type) + "." + getShortType(type) + "Repository";
     }
 
     //参数：类的全限定名
@@ -355,6 +356,103 @@ public class FileUtils {
         }
 
         return propertyPart.toString();
+
+    }
+
+    //参数：hbm文件内容
+    //返回：属性字符串
+    public static String getPropertyOfData(String filePath) throws JDOMException, IOException {
+        File file = new File(filePath);
+        SAXBuilder saxBuilder = new SAXBuilder();
+        saxBuilder.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        Document doc = saxBuilder.build(file);
+        Element root = doc.getRootElement();
+        //获取propertyList
+        Element classEle = root.getChild("class");
+        List<Element> children = classEle.getChildren("property");
+        List<Element> manyToOne = classEle.getChildren("many-to-one");
+        StringBuilder propertyPart = new StringBuilder();
+        importPart = new StringBuilder();
+
+        for (Element child : children) {
+            String name = child.getAttributeValue("name");
+            String column = child.getAttributeValue("column");
+            String type = child.getAttributeValue("type");
+            //获得java类型
+            type = hibernate2JavaMap.get(type);
+
+            //如果有BigDecimal类型那么要加入到importPart中
+            if (type.endsWith("BigDecimal")) importPart.append("import ").append(type).append(";\n");
+
+            //获得简写类型
+            type = getShortType(type);
+            //貌似不需要存储
+
+
+            ordinaryPropertyMap.put(type, name);
+            //如果有日期类型的话，那么要加上注解
+            if (type.equalsIgnoreCase(Constant.DATE)) {
+                propertyPart.append("\t").append("@JsonFormat(pattern = \"yyyy-MM-dd\")\n");
+            }
+            propertyPart.append("\t").append("private ").append(type).append(" ").append(name).append(";\n\n");
+        }
+
+        for (Element child : manyToOne) {
+            String name = child.getAttributeValue("name");
+            String column = child.getAttributeValue("column");
+            String type = child.getAttributeValue("class");
+
+            //如果与当前类是同包下可以省略import,这里就不处理
+            importPart.append("import ").append(type).append(";\n");
+
+
+            //获得简写类型
+            type = getShortType(type);
+
+            //保存many-to-one的Type与name，后续会用到
+            manyToOnePropertyMap.put(type, name);
+
+            propertyPart.append("\t").append("private ").append(type).append(" ").append(name).append(";\n\n");
+
+
+        }
+
+        return propertyPart.toString();
+    }
+
+    public static String getPropertyAssign(String className) {
+        //迭代orimap与manyto map
+        //将form中的内容都赋值到当前的属性中
+        StringBuilder ret = new StringBuilder();
+        ordinaryPropertyMap.forEach((type, name) -> {
+            ret.append("\n\t\t").append("this.").append(name).append(" = ").append(getLowerClassName(className)).append(".")
+                    .append("get").append(getUpperName(name)).append("();");
+        });
+        //将多对一字段赋值到当前类中
+        manyToOnePropertyMap.forEach((type, name) -> {
+            ret.append("\n\t\t").append("this.").append(name).append(" = ").append(getLowerClassName(className)).append(".").append("get").append(getUpperName(name)).append("()").append(";");
+        });
+
+        return ret.toString();
+    }
+
+    //获得service动态方法
+    public static String getManyToOneServiceMethod(String className) {
+        //根据manyMap来决定这一组方法的数量
+        //List<@CLASS_NAME@Data> find@CLASS_NAME@ListBy@MANY_TYPE@Id(long @MANY_TYPE@Id);
+        //PageData<@CLASS_NAME@Data> find@CLASS_NAME@PageBy@MANY_TYPE@Id(long @MANY_TYPE@Id, Pageable pageable);
+
+        StringBuilder serviceMethod = new StringBuilder();
+        manyToOnePropertyMap.forEach((type, name) -> {
+            serviceMethod.append("\tList<").append(className).append("Data>")
+                    .append(" find").append(className).append("ListBy").append(type).append("Id")
+                    .append("(").append("long").append(" ").append(getLowerClassName(type)).append("Id").append(");\n");
+
+            serviceMethod.append("\tPageData<").append(className).append("Data>").append(" ").append("find").append(className)
+                    .append("PageBy").append(type).append("Id").append("(long ").append(getLowerClassName(type)).append("Id, Pageable pageable);\n");
+        });
+
+        return serviceMethod.toString();
 
     }
 }
