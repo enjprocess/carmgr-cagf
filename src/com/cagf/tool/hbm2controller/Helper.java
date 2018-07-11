@@ -1,19 +1,15 @@
-package com.cagf.tool.hbm2serviceimpl;
+package com.cagf.tool.hbm2controller;
 
-import com.cagf.tool.util.Constant;
 import com.cagf.tool.util.FileUtils;
-import org.jdom.Document;
-import org.jdom.Element;
 import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.persistence.Id;
-import javax.servlet.jsp.tagext.PageData;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.cagf.tool.util.Constant.*;
 
@@ -51,7 +47,7 @@ public class Helper {
     }
 
     //根据hbm生成ORM
-    public void generateServiceImpl(String outputDir, List<String> hbmList, String templateFile) throws IOException, JDOMException {
+    public void generateController(String outputDir, List<String> hbmList, String templateFile) throws IOException, JDOMException {
         int i = 0;
         for (; i < hbmList.size(); i++) {
             //设置基本数据
@@ -62,12 +58,12 @@ public class Helper {
             String newOrm = doReplace(templateFileContent, hbmList.get(i));
 
             //写到磁盘
-            javaFileDiskPath = outputDir + "/" + getPackagePath(getPackageName()) + "/" + className + "ServiceImpl" + ".java";
+            javaFileDiskPath = outputDir + "/" + getPackagePath(getPackageName()) + "/" + className + "Controller" + ".java";
             fileParentDir = outputDir + "/" + getPackagePath(getPackageName());
             writeToDisk(fileParentDir, javaFileDiskPath, newOrm);
 
         }
-        System.out.println("generate " + i + " serviceImpl files");
+        System.out.println("generate " + i + " controller files");
     }
 
     private void writeToDisk(String fileParentDir, String javaFileDiskPath, String ormContent) throws IOException {
@@ -90,130 +86,80 @@ public class Helper {
 *
 * */
     private String doReplace(String templateContent, String hbmPath) throws JDOMException, IOException {
+
+        //设置manyMap;
+        FileUtils.getProperty(hbmPath);
+
         return templateContent
-                .replace(REPOSITORY_CLASS_NAME, getRepositoryClassFullName())
-                .replace(SERVICE_FULL_NAME, getServiceFullName())
                 .replace(PACKAGE_NAME, getPackageName())
+                .replace(CLASS_NAME, className)
                 .replace(CLASS_DATA_FULL_NAME, getClassDataFullName())
                 .replace(CLASS_FORM_FULL_NAME, getClassFormFullName())
-                .replace(CLASS_FULL_NAME, classFullName)
-                .replace(PROPERTY, getProperty(hbmPath))
-                .replace(IMPORT_TYPE, FileUtils.getImportType())
-                .replace(CLASS_NAME, className)
-                .replace(MANY_TO_ONE_REPOSITORY_QUERY, getManyToOneRepositoryQuery())
-                .replace(REPOSITORY_SAVE_OPERATOR, getRepositorySaveOperator())
-                .replace(ORM_UPDATE_OPERATOR, getOrmUpdateOperator())
-                .replace(MANY_TO_ONE_SERVICE_IMPL_METHOD, getManyToOneServiceImplMethod())
                 .replace(CLASS_LOWER_NAME, FileUtils.getLowerClassName(className))
-                .replace(CLASS_FULL_NAME, classFullName).trim();
+                .replace(MANY_TO_ONE_CONTROLLER_METHOD, getManyToOneControllerMethod())
+                .trim();
+
+
+
 
 
 
 
     }
 
-    //一端进行查询
-    private String getManyToOneServiceImplMethod() {
+    private CharSequence getManyToOneControllerMethod() {
 
-
-
-       StringBuilder ret = new StringBuilder();
-       //未分页的
+        StringBuilder ret = new StringBuilder();
+        //未分页的
         setManyQuery(ret);
 
         //分页的
         setManyPageQuery(ret);
-       return ret.toString();
+        return ret.toString();
     }
 
+
     private void setManyQuery(StringBuilder ret) {
-         /* public List<@CLASSNAME@> find@CLASSNAME@ListBy@MANY_TYPE@Id(long @many_type@Id) {
-            List<@CLASSNAME@> @classname@List = @classname@Repository.findAll((r, q, cb) -> {
-                Predicate p = cb.and(cb.equal(r.get("@many_type@").get("id"), @many_type@Id), cb.equal(r.get("deleted"),false));
-                q.where(p);
-                q.orderBy(cb.desc(r.get("id")));
-                return q.getRestriction();
-            });
-
-            if (@classname@List == null) {
-                throw new CodeDefinedException(ExceptionCode.EX_NOT_FOUND_ERROR);
-            }
-
-
-            return @classname@List.stream().map(p -> new @CLASS_NAME@Data(p)).collect(Collectors.toList());
-        }*/
+/*
+        @RequestMapping(value = "/queryList/{repaymentPlanId}", method = RequestMethod.GET)
+        public Result findRepaymentPlanDetListByRepaymentPlanId(@PathVariable long repaymentPlanId) {
+            List<RepaymentPlanDetData> ret = repaymentPlanDetService.findRepaymentPlanDetListByRepaymentPlanId(repaymentPlanId);
+            return Result.success(ret);
+        }
+*/
         FileUtils.manyToOnePropertyMap.forEach((type, name) -> {
             String shortType = FileUtils.getShortType(type);
             String lowType = FileUtils.getLowerClassName(shortType);
-            ret.append("\t").append("@Override").append("\n")
-                    .append("\t").append("public List<").append(className).append("Data>").append(" find")
-                    .append(className).append("ListBy").append(shortType).append("Id").append("(long ")
-                    .append(lowType).append("Id").append(") {")
-                    .append("\n\t\t")
-                    .append("List<").append(className).append(">").append(" ").append(FileUtils.getLowerClassName(className))
-                    .append("List").append(" = ").append(FileUtils.getLowerClassName(className)).append("Repository").append(".findAll")
-                    .append("((r, q, cb)").append(" -> ").append(" {")
-                    .append("\n\t\t\t")
-                    .append("Predicate p").append(" = ").append("cb.and(cb.equal(r.get(\"").append(lowType).append("\"").append(")")
-                    .append(".get(\"id\")").append(", ").append(lowType).append("Id").append("), ").append("cb.equal(r.get(\"deleted\"), false));")
-                    .append("\n\t\t\t")
-                    .append("q.where(p);").append("\n\t\t\t").append("q.orderBy(cb.desc(r.get(\"id\")));")
-                    .append("\n\t\t\t").append("return q.getRestriction();").append("\n\t\t});")
-                    .append("\n\t\t")
-                    .append("if (").append(FileUtils.getLowerClassName(className)).append("List == null) {").append("\n\t\t\t")
-                    .append("throw new CodeDefinedException(ExceptionCode.EX_NOT_FOUND_ERROR);").append("\n\t\t}").append("\n\t\t")
-                    .append("return ").append(FileUtils.getLowerClassName(className)).append("List").append(".").append("stream().map(p -> new ")
-                    .append(className).append("Data").append("(p))").append(".").append("collect").append("(Collectors.toList());")
-                    .append("\n\t}");
+            ret.append("\t@RequestMapping(value = \"/queryList/{").append(lowType).append("Id").append("}\", method = RequestMethod.GET)")
+                    .append("\n\t").append("public Result findRepaymentPlanDetListByRepaymentPlanId(@PathVariable long ").append(lowType).append("Id) {")
+                    .append("\n\t\t").append("List<").append(className).append("Data").append("> ret = ").append(FileUtils.getLowerClassName(className))
+                    .append("Service").append(".find").append(className).append("ListBy").append(shortType).append("Id(").append(lowType).append("Id);")
+                    .append("\n\t\t").append("return Result.success(ret);\n\t").append("}\n");
 
         });
     }
 
     private void setManyPageQuery(StringBuilder ret) {
-        /*@Override
-        public PageData<@CLASSNAME@Data> find@CLASSNAME@PageBy@MANY_TYPE@Id(long @many_type@Id, Pageable pageable) {
-            Page<@CLASSNAME@> @CLASSNAME@Page = @classname@Repository.findAll((r, q, cb) -> {
-                Predicate p = cb.and(cb.equal(r.get("@many_type@").get("id"), @many_type@Id), cb.equal(r.get("deleted"),false));
-                q.where(p);
-                q.orderBy(cb.desc(r.get("id")));
-                return q.getRestriction();
-            }, pageable);
-
-
-            if (@classname@Page == null) {
-                throw new CodeDefinedException(ExceptionCode.EX_NOT_FOUND_ERROR);
-            }
-
-            return new PageData(@classname@Page.map(p -> new @CLASSNAME@Data(p)));
+        /*@RequestMapping(value = "/queryPage/{repaymentPlanId}", method = RequestMethod.GET)
+        public Result findRepaymentPlanDetPageByRepaymentPlanId(@PathVariable long repaymentPlanId, QueryParam queryParam) {
+            PageData<RepaymentPlanDetData> ret = repaymentPlanDetService.findRepaymentPlanDetPageByRepaymentPlanId(repaymentPlanId, queryParam.getPageable());
+            return Result.success(ret);
         }*/
 
         FileUtils.manyToOnePropertyMap.forEach((type, name) -> {
             String shortType = FileUtils.getShortType(type);
             String lowType = FileUtils.getLowerClassName(shortType);
-            ret.append("\n\t").append("@Override").append("\n")
-                    .append("\t").append("public PageData<").append(className).append("Data>").append(" find")
-                    .append(className).append("PageBy").append(shortType).append("Id").append("(long ")
-                    .append(lowType).append("Id").append(", Pageable pageable").append(") {")
-                    .append("\n\t\t")
-                    .append("Page<").append(className).append(">").append(" ").append(FileUtils.getLowerClassName(className))
-                    .append("Page").append(" = ").append(FileUtils.getLowerClassName(className)).append("Repository").append(".findAll")
-                    .append("((r, q, cb)").append(" -> ").append(" {")
-                    .append("\n\t\t\t")
-                    .append("Predicate p").append(" = ").append("cb.and(cb.equal(r.get(\"").append(lowType).append("\"").append(")")
-                    .append(".get(\"id\")").append(", ").append(lowType).append("Id").append("), ").append("cb.equal(r.get(\"deleted\"), false));")
-                    .append("\n\t\t\t")
-                    .append("q.where(p);").append("\n\t\t\t").append("q.orderBy(cb.desc(r.get(\"id\")));")
-                    .append("\n\t\t\t").append("return q.getRestriction();").append("\n\t\t}, pageable);")
-                    .append("\n\t\t")
-                    .append("if (").append(FileUtils.getLowerClassName(className)).append("Page").append(" == null) {").append("\n\t\t\t")
-                    .append("throw new CodeDefinedException(ExceptionCode.EX_NOT_FOUND_ERROR);").append("\n\t\t}").append("\n\t\t")
-                    .append("return ").append("new PageData(").append(FileUtils.getLowerClassName(className)).append("Page").append(".").append("map(p -> new ")
-                    .append(className).append("Data").append("(p)));")
-                    .append("\n\t}");
+            ret.append("\t@RequestMapping(value = \"/queryPage/{").append(lowType).append("Id").append("}\"").append(", method = ")
+                    .append("RequestMethod.GET)").append("\n\t").append("public Result find").append(className)
+                    .append("PageBy").append(shortType).append("Id(").append("@PathVariable long ").append(lowType).append("Id")
+                    .append(", QueryParam queryParam").append(") {")
+                    .append("\n\t\t").append("PageData<").append(className).append("Data").append(">").append(" ret = ").append(FileUtils.getLowerClassName(className))
+                    .append("Service").append(".").append("find").append(className).append("PageBy").append(shortType).append("Id(")
+                    .append(lowType).append("Id").append(", queryParam.getPageable());").append("\n\t\t").append("return Result.success(ret);\n\t}\n");
 
         });
-
     }
+
 
     //serviceImpl update操作语句
     private String getOrmUpdateOperator() {
@@ -269,7 +215,7 @@ public class Helper {
 
     //得到一端的Repository
     private String getProperty(String hbmPath) throws JDOMException, IOException {
-        return FileUtils.getPropertyOfServiceImpl(hbmPath);
+        return FileUtils.getProperty(hbmPath);
     }
 
 
@@ -291,7 +237,7 @@ public class Helper {
 
     //得到包名
     private String getPackageName() {
-        return FileUtils.getBasicPackageName(classFullName) + ".application.impl";
+        return FileUtils.getBasicPackageName(classFullName) + ".web.restful." + moduleName;
     }
 
 

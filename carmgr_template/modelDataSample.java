@@ -2,6 +2,7 @@ package @PACKAGE_NAME@;
 
 import @ORM_CLASS_NAME@;
 
+
 @IMPORT_TYPE@
 
 import java.util.*;

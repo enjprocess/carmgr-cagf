@@ -125,7 +125,7 @@ public class FileUtils {
 
     //参数:hbm文件路径
     //返回：动态property
-    public static String getProperty(String filePath) throws JDOMException, IOException {
+    public static String getPropertyOfServiceImpl(String filePath) throws JDOMException, IOException {
         File file = new File(filePath);
         SAXBuilder saxBuilder = new SAXBuilder();
         saxBuilder.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
@@ -178,6 +178,66 @@ public class FileUtils {
 
         return propertyPart.toString();
     }
+
+    public static String getProperty(String filePath) throws JDOMException, IOException {
+        File file = new File(filePath);
+        SAXBuilder saxBuilder = new SAXBuilder();
+        saxBuilder.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        Document doc = saxBuilder.build(file);
+        Element root = doc.getRootElement();
+        //获取propertyList
+        Element classEle = root.getChild("class");
+        List<Element> children = classEle.getChildren("property");
+        List<Element> manyToOne = classEle.getChildren("many-to-one");
+        StringBuilder propertyPart = new StringBuilder();
+        importPart = new StringBuilder();
+
+        for (Element child : children) {
+            String name = child.getAttributeValue("name");
+            String column = child.getAttributeValue("column");
+            String type = child.getAttributeValue("type");
+            //获得java类型
+            type = hibernate2JavaMap.get(type);
+
+            //如果有BigDecimal类型那么要加入到importPart中
+            if (type.endsWith("BigDecimal")) importPart.append("import ").append(type).append(";\n");
+
+            //获得简写类型
+            type = getShortType(type);
+            //貌似不需要存储
+
+
+            ordinaryPropertyMap.put(type, name);
+            propertyPart.append("\t@Column(name = \"").append(column).append("\")\n")
+                    .append("\t").append("private ").append(type).append(" ").append(name).append(";\n\n");
+        }
+
+        for (Element child : manyToOne) {
+            String name = child.getAttributeValue("name");
+            String column = child.getAttributeValue("column");
+            String type = child.getAttributeValue("class");
+
+            //如果与当前类是同包下可以省略import,这里就不处理
+            importPart.append("import ").append(type).append(";\n");
+
+
+            //获得简写类型
+            type = getShortType(type);
+
+            //保存many-to-one的Type与name，后续会用到
+            manyToOnePropertyMap.put(type, name);
+
+            propertyPart.append("\t@JoinColumn(name = \"").append(column).append("\")\n")
+                    .append("\t").append("@ManyToOne").append("\n")
+                    .append("\t").append("private ").append(type).append(" ").append(name).append(";\n\n");
+
+
+        }
+
+        return propertyPart.toString();
+    }
+
+
 
     private static String getRepositoryByORM(String type) {
         return getBasicPackageName(type) + ".persistence.jpa." + getModuleName(type) + "." + getShortType(type) + "Repository";
@@ -392,7 +452,8 @@ public class FileUtils {
             ordinaryPropertyMap.put(type, name);
             //如果有日期类型的话，那么要加上注解
             if (type.equalsIgnoreCase(Constant.DATE)) {
-                propertyPart.append("\t").append("@JsonFormat(pattern = \"yyyy-MM-dd\")\n");
+                propertyPart.append("\t").append("@JsonFormat(pattern = \"yyyy-MM-dd\",timezone=\"GMT+8\")\n");
+                importPart.append("import ").append("com.fasterxml.jackson.annotation.JsonFormat;\n");
             }
             propertyPart.append("\t").append("private ").append(type).append(" ").append(name).append(";\n\n");
         }
@@ -448,7 +509,7 @@ public class FileUtils {
                     .append(" find").append(className).append("ListBy").append(type).append("Id")
                     .append("(").append("long").append(" ").append(getLowerClassName(type)).append("Id").append(");\n");
 
-            serviceMethod.append("\tPageData<").append(className).append("Data>").append(" ").append("find").append(className)
+            serviceMethod.append("\n\tPageData<").append(className).append("Data>").append(" ").append("find").append(className)
                     .append("PageBy").append(type).append("Id").append("(long ").append(getLowerClassName(type)).append("Id, Pageable pageable);\n");
         });
 

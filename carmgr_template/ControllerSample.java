@@ -1,9 +1,9 @@
-package cn.com.workapp.carmgr.web.restful.handovercar;
+package @PACKAGE_NAME@;
 
-import cn.com.workapp.carmgr.application.@CLASSNAME@Service;
+import cn.com.workapp.carmgr.application.@CLASS_NAME@Service;
 import cn.com.workapp.carmgr.application.data.PageData;
-import cn.com.workapp.carmgr.application.data.handovercar.@CLASSNAME@Data;
-import cn.com.workapp.carmgr.application.query.handovercar.@CLASSNAME@Form;
+import @CLASS_DATA_FULL_NAME@;
+import @CLASS_FORM_FULL_NAME@;
 import cn.com.workapp.carmgr.web.restful.QueryParam;
 import cn.com.workapp.carmgr.web.restful.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,44 +14,36 @@ import java.util.*;
 
 @RequestMapping("/@classname@")
 @RestController
-public class @CLASSNAME@Controller {
+public class @CLASS_NAME@Controller {
 
 
     @Autowired
-    private @CLASSNAME@Service @classname@Service;
+    private @CLASS_NAME@Service @classname@Service;
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public Result add@CLASSNAME@(@RequestBody @CLASSNAME@Form form) {
-        return Result.success(@classname@Service.add@CLASSNAME@(form));
+    public Result add@CLASS_NAME@(@RequestBody @CLASS_NAME@Form form) {
+        return Result.success(@classname@Service.add@CLASS_NAME@(form));
     }
 
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
-    public Result del@CLASSNAME@(@PathVariable long id) {
-        @classname@Service.del@CLASSNAME@(id);
+    public Result del@CLASS_NAME@(@PathVariable long id) {
+        @classname@Service.del@CLASS_NAME@(id);
         return Result.success();
     }
 
     @RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
-    public Result update@CLASSNAME@(@PathVariable long id, @RequestBody @CLASSNAME@Form form) {
-        @classname@Service.update@CLASSNAME@(id, form);
+    public Result update@CLASS_NAME@(@PathVariable long id, @RequestBody @CLASS_NAME@Form form) {
+        @classname@Service.update@CLASS_NAME@(id, form);
         return Result.success();
     }
 
     @RequestMapping(value = "/query/{id}", method = RequestMethod.GET)
-    public Result findOne@CLASSNAME@ById(@PathVariable long id) {
-        @CLASSNAME@Data @classname@Data = @classname@Service.findOne@CLASSNAME@ById(id);
+    public Result findOne@CLASS_NAME@ById(@PathVariable long id) {
+        @CLASS_NAME@Data @classname@Data = @classname@Service.findOne@CLASS_NAME@ById(id);
         return Result.success(@classname@Data);
     }
 
-    @RequestMapping(value = "/queryList/{@many_to_one_property@}", method = RequestMethod.GET)
-    public Result find@CLASSNAME@ListBy@MANY_TO_ONE_PROPERTY@(@PathVariable  long @many_to_one_property@) {
-        List<@CLASSNAME@Data> ret = @classname@Service.find@CLASSNAME@ListBy@MANY_TO_ONE_PROPERTY@(@many_to_one_property@);
-        return Result.success(ret);
-    }
+@MANY_TO_ONE_CONTROLLER_METHOD@
 
-    @RequestMapping(value = "/queryPage/{@many_to_one_property@}", method = RequestMethod.GET)
-    public Result find@CLASSNAME@PageBy@MANY_TO_ONE_PROPERTY@(@PathVariable long @many_to_one_property@, QueryParam queryParam) {
-        PageData<@CLASSNAME@Data> ret = @classname@Service.find@CLASSNAME@PageBy@MANY_TO_ONE_PROPERTY@(@many_to_one_property@, queryParam.getPageable());
-        return Result.success(ret);
-    }
+
 }

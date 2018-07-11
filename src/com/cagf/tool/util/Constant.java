@@ -48,4 +48,5 @@ public class Constant {
     public static final String CLASS_LOWER_NAME = "@classname@";                                           //类名首字母小写
     public static final String ORM_CLASS_NAME = "@ORM_CLASS_NAME@";                                         //ORM类全限定名
     public static final String SERVICE_FULL_NAME = "@SERVICE_FULL_NAME@";                                   //service全限定名
+    public static final String MANY_TO_ONE_CONTROLLER_METHOD = "@MANY_TO_ONE_CONTROLLER_METHOD@";           //动态获取Controller方法
 }

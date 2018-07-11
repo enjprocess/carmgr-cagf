@@ -72,6 +72,16 @@
             <arg line="${hibernate.mappings.string}" />
         </java>
 
+        <!-- 生成Controller-->
+        <java classname="com.cagf.tool.hbm2controller.GenerateControllerCode" >
+            <classpath refid="ant.run.classpath" />
+            <arg line="--outputDir=${outputDir}" />
+            <arg line="--templateFile=${templateDir}/${controllerTemplateFile}" />
+            <arg line="${hibernate.mappings.string}" />
+        </java>
+
+        <!-- 将文件 -->
+
 
     </target>
 
