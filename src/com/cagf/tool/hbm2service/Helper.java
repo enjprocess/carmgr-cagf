@@ -47,6 +47,9 @@ public class Helper {
     public void generateService(String outputDir, List<String> hbmList, String templateFile) throws IOException, JDOMException {
         int i = 0;
         for (; i < hbmList.size(); i++) {
+            FileUtils.manyToOnePropertyMap.clear();
+            FileUtils.ordinaryPropertyMap.clear();
+
             //设置基本数据
             setBasicData(hbmList, i);
             //读取模板文件内容

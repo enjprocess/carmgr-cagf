@@ -54,6 +54,8 @@ public class Helper {
     public void generateServiceImpl(String outputDir, List<String> hbmList, String templateFile) throws IOException, JDOMException {
         int i = 0;
         for (; i < hbmList.size(); i++) {
+            FileUtils.manyToOnePropertyMap.clear();
+            FileUtils.ordinaryPropertyMap.clear();
             //设置基本数据
             setBasicData(hbmList, i);
             //读取模板文件内容
@@ -142,10 +144,10 @@ public class Helper {
 
             return @classname@List.stream().map(p -> new @CLASS_NAME@Data(p)).collect(Collectors.toList());
         }*/
-        FileUtils.manyToOnePropertyMap.forEach((type, name) -> {
+        FileUtils.manyToOnePropertyMap.forEach((name, type) -> {
             String shortType = FileUtils.getShortType(type);
             String lowType = FileUtils.getLowerClassName(shortType);
-            ret.append("\t").append("@Override").append("\n")
+            ret.append("\n\t").append("@Override").append("\n")
                     .append("\t").append("public List<").append(className).append("Data>").append(" find")
                     .append(className).append("ListBy").append(shortType).append("Id").append("(long ")
                     .append(lowType).append("Id").append(") {")
@@ -187,7 +189,7 @@ public class Helper {
             return new PageData(@classname@Page.map(p -> new @CLASSNAME@Data(p)));
         }*/
 
-        FileUtils.manyToOnePropertyMap.forEach((type, name) -> {
+        FileUtils.manyToOnePropertyMap.forEach((name, type) -> {
             String shortType = FileUtils.getShortType(type);
             String lowType = FileUtils.getLowerClassName(shortType);
             ret.append("\n\t").append("@Override").append("\n")
@@ -223,7 +225,7 @@ public class Helper {
         StringBuilder sb = new StringBuilder();
         StringBuilder subUpdateStatement = new StringBuilder();
         StringBuilder updateStatement = new StringBuilder();
-        FileUtils.manyToOnePropertyMap.forEach((type, name) -> {
+        FileUtils.manyToOnePropertyMap.forEach((name, type) -> {
             String shortType = FileUtils.getShortType(type);
             String lowType = FileUtils.getLowerClassName(shortType);
             sb.append("\t\tList<").append(shortType).append(">").append(" ").append(lowType).append("List")
@@ -242,7 +244,7 @@ public class Helper {
                 .append("new ").append(className).append("(form");
 
         //动态部分
-        FileUtils.manyToOnePropertyMap.forEach((type, name) -> {
+        FileUtils.manyToOnePropertyMap.forEach((name, type) -> {
             String shortType = FileUtils.getShortType(type);
             String lowType = FileUtils.getLowerClassName(shortType);
             sb.append(", ").append(lowType).append("List").append(".get(0)");
@@ -256,7 +258,7 @@ public class Helper {
     //对一端对象进行查询
     private String getManyToOneRepositoryQuery() {
         StringBuilder sb = new StringBuilder();
-        FileUtils.manyToOnePropertyMap.forEach((type, name) -> {
+        FileUtils.manyToOnePropertyMap.forEach((name, type) -> {
             String shortType = FileUtils.getShortType(type);
             String lowType = FileUtils.getLowerClassName(shortType);
             sb.append("\t\tList<").append(shortType).append(">")

@@ -142,6 +142,7 @@ public class FileUtils {
             String name = child.getAttributeValue("name");
             String column = child.getAttributeValue("column");
             String type = child.getAttributeValue("type");
+
             //获得java类型
             type = hibernate2JavaMap.get(type);
 
@@ -151,7 +152,7 @@ public class FileUtils {
             //获得简写类型
             type = getShortType(type);
             //貌似不需要存储
-            ordinaryPropertyMap.put(type, name);
+            ordinaryPropertyMap.put(name, type);
         }
 
         for (Element child : manyToOne) {
@@ -168,7 +169,7 @@ public class FileUtils {
             type = getShortType(type);
 
             //保存many-to-one的Type与name，后续会用到
-            manyToOnePropertyMap.put(type, name);
+            manyToOnePropertyMap.put(name, type);
 
             propertyPart
                     .append("\t").append("@Autowired").append("\n")
@@ -196,6 +197,14 @@ public class FileUtils {
             String name = child.getAttributeValue("name");
             String column = child.getAttributeValue("column");
             String type = child.getAttributeValue("type");
+            String notNull = "";
+            String length = "";
+            if ("true".equalsIgnoreCase(child.getAttributeValue("not-null"))) {
+                notNull = ",nullable = false";
+            }
+            if (child.getAttributeValue("length") != null) {
+                length = ", length = " + child.getAttributeValue("length");
+            }
             //获得java类型
             type = hibernate2JavaMap.get(type);
 
@@ -207,8 +216,8 @@ public class FileUtils {
             //貌似不需要存储
 
 
-            ordinaryPropertyMap.put(type, name);
-            propertyPart.append("\t@Column(name = \"").append(column).append("\")\n")
+            ordinaryPropertyMap.put(name, type);
+            propertyPart.append("\t@Column(name = \"").append(column).append("\"").append(notNull).append(length).append(")\n")
                     .append("\t").append("private ").append(type).append(" ").append(name).append(";\n\n");
         }
 
@@ -225,7 +234,7 @@ public class FileUtils {
             type = getShortType(type);
 
             //保存many-to-one的Type与name，后续会用到
-            manyToOnePropertyMap.put(type, name);
+            manyToOnePropertyMap.put(name, type);
 
             propertyPart.append("\t@JoinColumn(name = \"").append(column).append("\")\n")
                     .append("\t").append("@ManyToOne").append("\n")
@@ -266,12 +275,12 @@ public class FileUtils {
     //返回：类的getter和setter方法
     public static String getGetterAndSetter() {
         StringBuilder ret = new StringBuilder();
-        ordinaryPropertyMap.forEach((type, name)-> {
+        ordinaryPropertyMap.forEach((name, type)-> {
             createSetAndGetMethod(ret, type, name);
         });
 
         //many-to-one的setter and getter方法
-        manyToOnePropertyMap.forEach((type, name) -> {
+        manyToOnePropertyMap.forEach((name, type) -> {
             createSetAndGetMethod(ret, type, name);
         });
 
@@ -282,12 +291,12 @@ public class FileUtils {
     //返回：类的getter和setter方法
     public static String getGetterAndSetterOfForm() {
         StringBuilder ret = new StringBuilder();
-        ordinaryPropertyMap.forEach((type, name)-> {
+        ordinaryPropertyMap.forEach((name, type)-> {
             createSetAndGetMethod(ret, type, name);
         });
 
         //many-to-one的setter and getter方法
-        manyToOnePropertyMap.forEach((type, name) -> {
+        manyToOnePropertyMap.forEach((name, type) -> {
             createSetAndGetMethod(ret, Constant.Long, name + Constant.ID);
         });
 
@@ -320,18 +329,18 @@ public class FileUtils {
     //功能：拼写 方法动态参数，及为类属性赋值
     private static void spellDynamicArgsPart(StringBuilder ret) {
         //拼写many-to-one动态参数部分
-        manyToOnePropertyMap.forEach((type, name)-> {
+        manyToOnePropertyMap.forEach((name, type)-> {
             ret.append(", ").append(type).append(" ").append(name);
         });
 
         ret.append(")").append(" {");
         //将form中的内容都赋值到当前的属性中
-        ordinaryPropertyMap.forEach((type, name) -> {
+        ordinaryPropertyMap.forEach((name, type) -> {
             ret.append("\n\t\t").append("this.").append(name).append(" = ").append("form").append(".")
                     .append("get").append(getUpperName(name)).append("();");
         });
         //将多对一字段赋值到当前类中
-        manyToOnePropertyMap.forEach((type, name) -> {
+        manyToOnePropertyMap.forEach((name, type) -> {
             ret.append("\n\t\t").append("this.").append(name).append(" = ").append(name).append(";");
         });
         //封闭方法
@@ -387,7 +396,7 @@ public class FileUtils {
             //貌似不需要存储
 
 
-            ordinaryPropertyMap.put(type, name);
+            ordinaryPropertyMap.put(name, type);
             //如果有日期类型的话，那么要加上注解
             if (type.equalsIgnoreCase(Constant.DATE)) {
                 propertyPart.append("\t").append("@JsonFormat(pattern = \"yyyy-MM-dd\")\n");
@@ -408,7 +417,7 @@ public class FileUtils {
             type = getShortType(type);
 
             //保存many-to-one的Type与name，后续会用到
-            manyToOnePropertyMap.put(type, name);
+            manyToOnePropertyMap.put(name, type);
 
             propertyPart.append("\t").append("private ").append(Constant.Long).append(" ").append(name).append(Constant.ID).append(";\n\n");
 
@@ -448,8 +457,10 @@ public class FileUtils {
             type = getShortType(type);
             //貌似不需要存储
 
+//            System.out.println("=====================调试=======================");
+//            System.out.println("type: " + type + ", name:" + name);
 
-            ordinaryPropertyMap.put(type, name);
+            ordinaryPropertyMap.put(name, type);
             //如果有日期类型的话，那么要加上注解
             if (type.equalsIgnoreCase(Constant.DATE)) {
                 propertyPart.append("\t").append("@JsonFormat(pattern = \"yyyy-MM-dd\",timezone=\"GMT+8\")\n");
@@ -471,7 +482,7 @@ public class FileUtils {
             type = getShortType(type);
 
             //保存many-to-one的Type与name，后续会用到
-            manyToOnePropertyMap.put(type, name);
+            manyToOnePropertyMap.put(name, type);
 
             propertyPart.append("\t").append("private ").append(type).append(" ").append(name).append(";\n\n");
 
@@ -482,15 +493,17 @@ public class FileUtils {
     }
 
     public static String getPropertyAssign(String className) {
+
         //迭代orimap与manyto map
         //将form中的内容都赋值到当前的属性中
         StringBuilder ret = new StringBuilder();
-        ordinaryPropertyMap.forEach((type, name) -> {
+        ordinaryPropertyMap.forEach((name, type) -> {
+//            System.out.println("type :" + type + ", name :" + name);
             ret.append("\n\t\t").append("this.").append(name).append(" = ").append(getLowerClassName(className)).append(".")
                     .append("get").append(getUpperName(name)).append("();");
         });
         //将多对一字段赋值到当前类中
-        manyToOnePropertyMap.forEach((type, name) -> {
+        manyToOnePropertyMap.forEach((name, type) -> {
             ret.append("\n\t\t").append("this.").append(name).append(" = ").append(getLowerClassName(className)).append(".").append("get").append(getUpperName(name)).append("()").append(";");
         });
 
@@ -504,7 +517,7 @@ public class FileUtils {
         //PageData<@CLASS_NAME@Data> find@CLASS_NAME@PageBy@MANY_TYPE@Id(long @MANY_TYPE@Id, Pageable pageable);
 
         StringBuilder serviceMethod = new StringBuilder();
-        manyToOnePropertyMap.forEach((type, name) -> {
+        manyToOnePropertyMap.forEach((name, type) -> {
             serviceMethod.append("\tList<").append(className).append("Data>")
                     .append(" find").append(className).append("ListBy").append(type).append("Id")
                     .append("(").append("long").append(" ").append(getLowerClassName(type)).append("Id").append(");\n");

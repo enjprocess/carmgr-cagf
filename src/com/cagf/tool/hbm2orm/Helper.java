@@ -43,6 +43,8 @@ public class Helper {
     public void generateORM(String outputDir, List<String> hbmList, String templateFile) throws IOException, JDOMException {
         int count = 0;
         for (int i = 0; i < hbmList.size(); i++,count++) {
+            FileUtils.manyToOnePropertyMap.clear();
+            FileUtils.ordinaryPropertyMap.clear();
             //设置基本数据
             setBasicData(hbmList, i);
             //读取模板文件内容

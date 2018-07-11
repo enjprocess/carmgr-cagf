@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+	<class name="cn.com.workapp.carmgr.domain.model.oa.CompanyAccount" table="company_account">
+
+		<id name="id" column="id" type="long">
+			<generator class="native"></generator>
+		</id>
+
+		<many-to-one name="depart" column="company_id" class="cn.com.workapp.carmgr.domain.model.oa.Depart"/>
+		<property name="accountType" column="account_type" type="integer" length="20"/>
+		<many-to-one name="bank" column="bank_id" class="cn.com.workapp.carmgr.domain.model.bank.Bank"/>
+		<property name="accountOwner" column="account_owner" type="string" not-null="true" length="22"/>
+		<property name="accountNumber" column="account_number" type="string" not-null="false" />
+
+	</class>
+
+</hibernate-mapping>
